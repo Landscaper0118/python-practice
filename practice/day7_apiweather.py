@@ -3,7 +3,7 @@
 import requests
 
 #作成した自分のAPIキー(公開しない)
-API_KEY = "dfb92224b04450fde1497dd3d1744395"
+API_KEY = ""
 
 lat = float(input("lat: "))
 lon = float(input("lon: "))
