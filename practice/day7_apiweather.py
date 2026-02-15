@@ -40,28 +40,62 @@
 # else:
 #     print("判定: 大きな雪・凍結リスクは低そう")
 
+# import requests
+# # #作成した自分のAPIキー(公開しない)
+# API_KEY = ""
+
+# url = "https://api.openweathermap.org/data/2.5/weather"
+# params_tokyo = {
+#     "q": "Tokyo",
+#     "appid": API_KEY,
+#     "units": "metric"
+# }
+
+# try:
+#     response = requests.get(url,params=params_tokyo)
+#     if response.status_code == 200:
+#         try:
+#             data = response.json()
+#             print("現在の気温:",data["main"]["temp"],"℃")
+#         except ValueError:
+#             print("JSONエラー")
+#         except KeyError:
+#             print("温度データエラー")
+#     else:
+#         print("HTTPエラー:",response.status_code)
+# except requests.exceptions.RequestException as e:
+#     print("通信エラー:", e)
+
 import requests
 # #作成した自分のAPIキー(公開しない)
-API_KEY = ""
+API_KEY = "dfb92224b04450fde1497dd3d1744395"
 
 url = "https://api.openweathermap.org/data/2.5/weather"
-params_tokyo = {
-    "q": "Tokyo",
+
+def get_weather(city):
+    params = {
+    "q": city,
     "appid": API_KEY,
     "units": "metric"
 }
+    try:
+        response = requests.get(url,params=params)
+    except requests.exceptions.RequestException:
+        return None
 
-try:
-    response = requests.get(url,params=params_tokyo)
-    if response.status_code == 200:
-        try:
-            data = response.json()
-            print("現在の気温:",data["main"]["temp"],"℃")
-        except ValueError:
-            print("JSONエラー")
-        except KeyError:
-            print("温度データエラー")
-    else:
-        print("HTTPエラー:",response.status_code)
-except requests.exceptions.RequestException as e:
-    print("通信エラー:", e)
+    if response.status_code != 200:
+        return None
+
+    try:
+        data = response.json()
+        return data["main"]["temp"]
+    except (ValueError,KeyError):
+        return None
+
+for city in ["Tokyo","Osaka"]:
+    temp = get_weather("Tokyo")
+
+if temp is None:
+    print("取得失敗")
+else:
+    print(temp)
