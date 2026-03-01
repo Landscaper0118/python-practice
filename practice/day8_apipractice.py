@@ -44,10 +44,18 @@ def get_weather(city, api_key, url):
         return None, "DATA_ERROR"
 
     return temp, None
-
+#現状だとエラーコードを追加する度にelifに追加しなければいけないため、管理ができなくなる(記載漏れやスペルミス等)
 for city in cities:
-    temp, error = get_weather(city, API_KEY, url)
-    if temp is not None:
-        print(f"{city}の気温:{temp}℃")
-    else:
-        print(f"{city}:{error}")
+    temp, error = get_weather(city, API_KEY, url) 
+    if temp is not None: 
+        print(f"{city:<10} | {temp}℃") 
+    else: 
+        code = error.split(":",1)[0] if error else "UNKNOWN_ERROR" 
+        
+        if code == "HTTP_ERROR_401": 
+            print(f"{city:<10} | ERROR: APIキーを確認 ({error})") 
+        elif code == "HTTP_ERROR_429": 
+            print(f"{city:<10} | ERROR: 回数制限 ({error})") 
+        else: 
+            print(f"{city:<10} | ERROR: {error}")
+        
