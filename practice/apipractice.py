@@ -45,17 +45,39 @@ def get_weather(city, api_key, url):
 
     return temp, None
 #現状だとエラーコードを追加する度にelifに追加しなければいけないため、管理ができなくなる(記載漏れやスペルミス等)
+# for city in cities:
+#     temp, error = get_weather(city, API_KEY, url) 
+#     if temp is not None: 
+#         print(f"{city:<10} | {temp}℃") 
+#     else: 
+#         code = error.split(":",1)[0] if error else "UNKNOWN_ERROR" 
+        
+#     if code == "HTTP_ERROR_401":
+#         print("APIキーを確認")
+#     elif code == "HTTP_ERROR_429":
+#         print("回数制限")
+#     elif code == "NETWORK_ERROR":
+#         print("通信エラー")
+#     elif code == "DATA_ERROR":
+#         print("データ形式エラー")
+#     else:
+#         print(error)
+
+#下記形式にすることで比較的に見やすくなる＋elifの追加処理を書かずに済む
+error_messages = {
+    "HTTP_ERROR_401":"APIキーを確認",
+    "HTTP_ERROR_429":"回数制限",
+    "NETWORK_ERROR":"通信エラー",
+    "DATA_ERROR":"データ形式エラー",
+}
+
 for city in cities:
-    temp, error = get_weather(city, API_KEY, url) 
-    if temp is not None: 
-        print(f"{city:<10} | {temp}℃") 
-    else: 
+    temp, error = get_weather(city, API_KEY, url)
+    if temp is not None:
+        print(f"{city:<10} | {temp}℃")
+    else:
         code = error.split(":",1)[0] if error else "UNKNOWN_ERROR" 
-        
-        if code == "HTTP_ERROR_401": 
-            print(f"{city:<10} | ERROR: APIキーを確認 ({error})") 
-        elif code == "HTTP_ERROR_429": 
-            print(f"{city:<10} | ERROR: 回数制限 ({error})") 
-        else: 
-            print(f"{city:<10} | ERROR: {error}")
-        
+        message = error_messages.get(code, error)
+    #今のままだと詳細メッセージが確認できないので改良する
+        # print(f"{city:<10} | ERROR:{message}")
+        print(f"{city:<10} | ERROR: {message} | {error}")
