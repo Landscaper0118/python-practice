@@ -5,10 +5,12 @@
 #1都市失敗しても続行 
 
 import requests
+import time
+import os
 
-API_KEY = ""
+API_KEY = os.getenv("OPENWEATHER_API_KEY")
 url = "https://api.openweathermap.org/data/2.5/weather"
-cities = ["Tokyo", "Osaka", "Fukuoka", "Sapporo", "Niigata"]
+cities = ["Tokyo", "Osaka", "Tiba",]
 
 def get_weather(city, api_key, url):
     params = {
@@ -71,13 +73,38 @@ error_messages = {
     "DATA_ERROR":"データ形式エラー",
 }
 
+ok_count = 0
+error_count = 0
+error_cities = []
+retry_codes = {"HTTP_ERROR_429"}
+
 for city in cities:
     temp, error = get_weather(city, API_KEY, url)
+    if temp is None:
+        code = str(error).split(":",1)[0] if error else "UNKNOWN_ERROR"
+
+        if code in retry_codes:
+            print(f"{city:<10} | RETRY | {code}")
+            time.sleep(1)
+            temp, error = get_weather(city, API_KEY, url)
+
     if temp is not None:
-        print(f"{city:<10} | {temp}℃")
+        ok_count += 1
+        print(f"{city:<10} | OK   | {temp}℃")
     else:
-        code = error.split(":",1)[0] if error else "UNKNOWN_ERROR" 
-        message = error_messages.get(code, error)
-    #今のままだと詳細メッセージが確認できないので改良する
-        # print(f"{city:<10} | ERROR:{message}")
-        print(f"{city:<10} | ERROR: {message} | {error}")
+        error_count += 1
+
+        code = str(error).split(":",1)[0] if error else "UNKNOWN_ERROR"
+        error_cities.append((city, code))
+
+        message = error_messages.get(code, str(error))
+        detail = "" if str(error) == message else f" | {error}"
+        print(f"{city:<10} | ERROR | {message}{detail}")
+
+print("-"*15)
+print(f"成功:{ok_count}")
+print(f"失敗:{error_count}")
+print(f"合計:{ok_count + error_count}")
+print("\n失敗した都市")
+for city, code in error_cities:
+    print(f"{city} ({code})")
